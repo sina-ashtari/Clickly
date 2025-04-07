@@ -21,6 +21,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Clickly.Data\Clickly.Data.csproj" />
+    <ProjectReference Include="..\Clickly.ServiceContracts\Clickly.ServiceContracts.csproj" />
+    <ProjectReference Include="..\Clickly.Services\Clickly.Services.csproj" />
   </ItemGroup>
 
 </Project>

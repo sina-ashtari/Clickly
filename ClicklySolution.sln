@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clickly", "Clickly\Clickly.csproj", "{CD299D77-513D-4259-AB7C-742C8AE9D0D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clickly.Data", "Clickly.Data\Clickly.Data.csproj", "{9E6A8A90-ADA9-4E1B-B191-57E14845ADA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clickly.ServiceContracts", "Clickly.ServiceContracts\Clickly.ServiceContracts.csproj", "{3E5151C3-A7A7-43F9-87A4-1ADE7765A3E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clickly.Services", "Clickly.Services\Clickly.Services.csproj", "{6D1372B9-49E7-4625-BA69-BFAB524F20CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{9E6A8A90-ADA9-4E1B-B191-57E14845ADA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E6A8A90-ADA9-4E1B-B191-57E14845ADA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E6A8A90-ADA9-4E1B-B191-57E14845ADA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E5151C3-A7A7-43F9-87A4-1ADE7765A3E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E5151C3-A7A7-43F9-87A4-1ADE7765A3E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E5151C3-A7A7-43F9-87A4-1ADE7765A3E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E5151C3-A7A7-43F9-87A4-1ADE7765A3E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D1372B9-49E7-4625-BA69-BFAB524F20CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D1372B9-49E7-4625-BA69-BFAB524F20CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D1372B9-49E7-4625-BA69-BFAB524F20CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D1372B9-49E7-4625-BA69-BFAB524F20CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
