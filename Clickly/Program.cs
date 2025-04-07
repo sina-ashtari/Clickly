@@ -1,5 +1,7 @@
 using Clickly.Data;
 using Clickly.Data.Helper;
+using Clickly.ServiceContracts;
+using Clickly.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Clickly
@@ -16,6 +18,10 @@ namespace Clickly
             {
                 options.UseSqlServer(dbConnection);
             });
+
+            builder.Services.AddScoped<IPostService, PostService>();
+            builder.Services.AddScoped<IHashtagsService, HashtagsService>();
+            builder.Services.AddScoped<IStoriesService, StoriesService>();
 
             builder.Services.AddControllersWithViews();
 
