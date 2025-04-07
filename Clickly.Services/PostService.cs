@@ -1,0 +1,159 @@
+﻿using Clickly.Data;
+using Clickly.Data.Models;
+using Clickly.ServiceContracts;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+
+namespace Clickly.Services
+{
+    public class PostService : IPostService
+    {
+        private readonly ApplicationDbContext _dbContext;
+        public PostService(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        public async Task<List<Post>> GetAllPostsAsync(int loggedInUserId)
+        {
+            var allPosts = await _dbContext.Posts
+                .Where(n => (!n.IsPrivate || n.UserId == loggedInUserId) && n.Reports.Count < 10 && !n.IsDeleted) // the post i created or the post that are public
+                .Include(n => n.User)
+                .Include(n => n.Like)
+                .Include(n => n.Favorites)
+                .Include(n => n.Comments).ThenInclude(n => n.User).OrderByDescending(n => n.DateCreated)
+                .Include(n => n.Reports)
+                .ToListAsync();
+
+            return allPosts;
+
+        }
+
+        public async Task AddPostCommentAsync(Comment comment)
+        {
+            await _dbContext.Comments.AddAsync(comment);
+            await _dbContext.SaveChangesAsync();
+            
+        }
+
+        public async Task<Post> CreatePostAsync(Post post, IFormFile image)
+        {
+
+            if (image != null && image.Length > 0)
+            {
+                string rootFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                // validating if the provided image type is correct then saving it in wwwroot folder
+                if (image.ContentType.Contains("image"))
+                {
+                    // first we trying to create root folder in that case we dont have it
+                    string rootFolderPathImage = Path.Combine(rootFolderPath, "images/posts");
+                    Directory.CreateDirectory(rootFolderPathImage);
+
+                    // then creating file name with defined Guid for each of them
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                    string filePath = Path.Combine(rootFolderPathImage, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await image.CopyToAsync(stream);
+
+                        post.Image = "/images/posts/" + fileName;
+                    }
+
+                }
+
+            }
+            await _dbContext.Posts.AddAsync(post);
+            await _dbContext.SaveChangesAsync();
+
+            return post;
+        }
+
+        public async Task DeletePostCommentAsync(int postId)
+        {
+            var commentDb = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == postId);
+            if (commentDb != null)
+            {
+                _dbContext.Comments.Remove(commentDb);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+
+        public async Task<Post> RemovePostAsync(int postId)
+        {
+            var postDatabase = await _dbContext.Posts.FirstOrDefaultAsync(c => c.Id == postId);
+            if (postDatabase != null)
+            {
+                postDatabase.IsDeleted = true;
+                _dbContext.Posts.Remove(postDatabase);
+                await _dbContext.SaveChangesAsync();
+            }
+            return postDatabase;
+        }
+
+        public async Task ReportPostAsync(int postId, int userId)
+        {
+            var newReport = new Report()
+            {
+                UserId = userId,
+                PostId = postId,
+                DateCreated = DateTime.UtcNow,
+
+            };
+
+            await _dbContext.Reports.AddAsync(newReport);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task TogglePostFavoriteAsync(int postId, int userId)
+        {
+            var favorite = await _dbContext.Favorites.Where(like => like.PostId == postId && like.UserId == userId).FirstOrDefaultAsync();
+            if (favorite != null)
+            {
+                _dbContext.Favorites.Remove(favorite);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                var newfavorite = new Favorite()
+                {
+                    PostId = postId,
+                    UserId = userId,
+                };
+                await _dbContext.Favorites.AddAsync(newfavorite);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task TogglePostLikeAsync(int postId, int userId)
+        {
+            var like = await _dbContext.Likes.Where(like => like.PostId == postId && like.UserId == userId).FirstOrDefaultAsync();
+            if (like != null)
+            {
+                _dbContext.Likes.Remove(like);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                var newLike = new Like()
+                {
+                    PostId = postId,
+                    UserId = userId,
+                };
+                await _dbContext.Likes.AddAsync(newLike);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task ToggleVisibilityPostAsync(int postId, int userId)
+        {
+            var post = await _dbContext.Posts.FirstOrDefaultAsync(l => l.Id == postId && l.UserId == userId);
+            if (post != null)
+            {
+                post.IsPrivate = !post.IsPrivate;
+                _dbContext.Posts.Update(post);
+                await _dbContext.SaveChangesAsync();
+            };
+        }
+    }
+}
