@@ -1,4 +1,5 @@
 ﻿using Clickly.Data;
+using Clickly.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,14 +7,14 @@ namespace Clickly.ViewComponents
 {
     public class StoriesViewComponent : ViewComponent
     {
-        private readonly ApplicationDbContext _dbContext;
-        public StoriesViewComponent(ApplicationDbContext dbContext)
+        private readonly IStoriesService _storiesService;
+        public StoriesViewComponent(IStoriesService storiesService)
         {
-            _dbContext = dbContext;
+            _storiesService = storiesService;
         }
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var allStories = await _dbContext.Stories.Where(n => n.DateCreated >= DateTime.UtcNow.AddHours(-24)).Include(s => s.User).ToListAsync();
+            var allStories =  await _storiesService.GetAllStoriesAsync();
             return View(allStories);
         }
     }
