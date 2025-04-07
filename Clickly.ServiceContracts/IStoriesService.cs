@@ -1,12 +1,10 @@
-﻿
-using Clickly.Data.Models;
-using Microsoft.AspNetCore.Http;
+﻿using Clickly.Data.Models;
 
 namespace Clickly.ServiceContracts
 {
     public interface IStoriesService
     {
         Task<List<Story>> GetAllStoriesAsync();
-        Task<Story> CreateStoryAsync(Story story, IFormFile image);
+        Task<Story> CreateStoryAsync(Story story);
     }
 }

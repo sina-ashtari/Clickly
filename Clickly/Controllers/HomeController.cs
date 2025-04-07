@@ -1,10 +1,8 @@
-using Clickly.Data;
-using Clickly.Data.Helper;
+using Clickly.Data.Helper.Enums;
 using Clickly.Data.Models;
 using Clickly.ServiceContracts;
 using Clickly.ViewModels.Home;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Clickly.Controllers
 {
@@ -13,12 +11,14 @@ namespace Clickly.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IHashtagsService _hashtagsService;
         private readonly IPostService _postService;
+        private readonly IFilesService _filesService;
 
-        public HomeController(ILogger<HomeController> logger, IHashtagsService hashtagsService, IPostService postService)
+        public HomeController(ILogger<HomeController> logger, IHashtagsService hashtagsService, IPostService postService, IFilesService filesService)
         {
             _hashtagsService = hashtagsService;
             _logger = logger;
             _postService = postService;
+            _filesService = filesService;   
         }
 
         public async Task<IActionResult> Index()
@@ -34,16 +34,17 @@ namespace Clickly.Controllers
         public async Task<IActionResult> CreatePost(PostVM post)
         {
             int loggedIn = 1; // we will change it to authentication later
+            var imageUploadPath = await _filesService.UploadImageAsync(post.Image, ImageFileType.PostImage);
             var newPost = new Post() { 
             Content = post.Content,
             DateCreated = DateTime.UtcNow,
             DateUpdated = DateTime.UtcNow,
-            Image = "",
+            Image = imageUploadPath,
             NumberOfReport = 0,
             UserId = loggedIn
             };
 
-            await _postService.CreatePostAsync(newPost, post.Image);
+            await _postService.CreatePostAsync(newPost);
 
             // find and store hashtags 
             await _hashtagsService.ProccessHashtagForNewPostAsync(post.Content);

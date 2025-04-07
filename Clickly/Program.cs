@@ -22,6 +22,7 @@ namespace Clickly
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IHashtagsService, HashtagsService>();
             builder.Services.AddScoped<IStoriesService, StoriesService>();
+            builder.Services.AddScoped<IFilesService, FilesService>();
 
             builder.Services.AddControllersWithViews();
 
