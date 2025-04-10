@@ -6,6 +6,8 @@ namespace Clickly.ServiceContracts
     public interface IPostService
     {
         Task<List<Post>> GetAllPostsAsync(int loggedInUserId);
+        Task<Post> GetPostByIdAsync(int postId);
+        Task<List<Post>> GetAllFavoritedPostAsync(int loggedInUserId);
         Task<Post> CreatePostAsync(Post post);
         Task<Post> RemovePostAsync(int postId);
 

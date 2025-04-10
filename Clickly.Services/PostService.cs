@@ -1,7 +1,6 @@
 ﻿using Clickly.Data;
 using Clickly.Data.Models;
 using Clickly.ServiceContracts;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Clickly.Services
@@ -97,6 +96,7 @@ namespace Clickly.Services
                 {
                     PostId = postId,
                     UserId = userId,
+                    DateCreated= DateTime.UtcNow
                 };
                 await _dbContext.Favorites.AddAsync(newfavorite);
                 await _dbContext.SaveChangesAsync();
@@ -132,6 +132,38 @@ namespace Clickly.Services
                 _dbContext.Posts.Update(post);
                 await _dbContext.SaveChangesAsync();
             };
+        }
+
+        public async Task<List<Post>> GetAllFavoritedPostAsync(int loggedInUserId)
+        {
+
+            var allFavoritesPost = await _dbContext.Favorites
+                .Include(f => f.Post.Reports)
+                .Include(f => f.Post.User)
+                .Include(f => f.Post.Comments)
+                    .ThenInclude(c => c.User)
+                .Include(f => f.Post.Like)
+                .Include(f => f.Post.Favorites)
+                .Where(f => f.UserId == loggedInUserId && !f.Post.IsDeleted && f.Post.Reports.Count < 5)
+                .OrderByDescending(f => f.DateCreated)
+                .Select(n => n.Post)
+                .ToListAsync();
+
+            return allFavoritesPost ;
+        }
+
+        public async Task<Post> GetPostByIdAsync(int postId)
+        {
+            var postDatabase = await _dbContext.Posts
+                .Include(n => n.User)
+                .Include(n => n.Like)
+                .Include(n => n.Favorites)
+                .Include(n => n.Comments)
+                .Include(n => n.Reports)
+                .FirstOrDefaultAsync(n => n.Id == postId);
+
+
+            return postDatabase;
         }
     }
 }
