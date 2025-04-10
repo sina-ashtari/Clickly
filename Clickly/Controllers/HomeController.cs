@@ -121,6 +121,11 @@ namespace Clickly.Controllers
             
             return RedirectToAction("index");
         }
+        public async Task<IActionResult> Details(int postId)
+        {
+            var post = await _postService.GetPostByIdAsync(postId);
+            return View(post);
+        }
 
     }
 }
