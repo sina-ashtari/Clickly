@@ -1,9 +1,11 @@
 ﻿using Clickly.Data.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Clickly.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options): base(options)
@@ -40,7 +42,7 @@ namespace Clickly.Data
             .HasOne(l => l.Post)
             .WithMany(p => p.Like)
             .HasForeignKey(l => l.PostId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Like>()
             .HasOne(l => l.User)
@@ -52,7 +54,7 @@ namespace Clickly.Data
             .HasOne(l => l.Post)
             .WithMany(p => p.Comments)
             .HasForeignKey(l => l.PostId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Comment>()
             .HasOne(l => l.User)
@@ -91,8 +93,17 @@ namespace Clickly.Data
             .OnDelete(DeleteBehavior.Restrict);
 
 
-
             base.OnModelCreating(modelBuilder);
+
+
+            // Customize identity model tables name
+            modelBuilder.Entity<User>().ToTable("Users");
+            modelBuilder.Entity<IdentityRole<int>>().ToTable("Roles");
+            modelBuilder.Entity<IdentityUserRole<int>>().ToTable("UserRoles");
+            modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
+            modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
+            modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
+            modelBuilder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
         }
     }
 }
