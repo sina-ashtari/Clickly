@@ -17,12 +17,17 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Clickly.Data\Clickly.Data.csproj" />
     <ProjectReference Include="..\Clickly.ServiceContracts\Clickly.ServiceContracts.csproj" />
     <ProjectReference Include="..\Clickly.Services\Clickly.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\welcome\" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,10 @@
 using Clickly.Data;
 using Clickly.Data.Helper;
+using Clickly.Data.Models;
 using Clickly.ServiceContracts;
 using Clickly.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Clickly
@@ -11,6 +14,7 @@ namespace Clickly
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
 
             // database string connection goes here.
             var dbConnection = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -25,6 +29,31 @@ namespace Clickly
             builder.Services.AddScoped<IFilesService, FilesService>();
             builder.Services.AddScoped<IUsersService, UsersService>();
 
+            // Identity configuration
+            builder.Services.AddIdentity<User, IdentityRole<int>>( options =>
+            {
+                // the redirection not completedd 
+                options.Password.RequiredLength = 6;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+            })
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Authentication/Login";
+                options.AccessDeniedPath = "/Authentication/AccessDenied";
+            });
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            {
+                options.LoginPath = "/Authentication/Login";
+                options.AccessDeniedPath = "/Authentication/AccessDenied";
+            });
+            builder.Services.AddAuthorization();
+
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
@@ -35,6 +64,10 @@ namespace Clickly
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 await dbContext.Database.MigrateAsync(); // make us sure that migration will be executed.
                 await DbInitializer.SeedAsync(dbContext);
+
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+                await DbInitializer.SeedUsersAndRolesAsync(userManager, roleManager);
             }
             if (!app.Environment.IsDevelopment())
             {
@@ -44,7 +77,8 @@ namespace Clickly
 
             app.UseHttpsRedirection();
             app.UseRouting();
-
+            app.UseAuthentication();
+            app.UseAuthorization(); 
             app.UseAuthorization();
 
             app.MapStaticAssets();
