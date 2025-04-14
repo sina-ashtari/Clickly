@@ -1,12 +1,15 @@
-﻿using Clickly.Data.Helper.Enums;
+﻿using Clickly.Controllers.Base;
+using Clickly.Data.Helper.Enums;
 using Clickly.Data.Models;
 using Clickly.ServiceContracts;
 using Clickly.ViewModels.Stories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clickly.Controllers
 {
-    public class StoriesController : Controller
+    [Authorize]
+    public class StoriesController : BaseController
     {
         private readonly IStoriesService _storiesService;
         private readonly IFilesService _filesService;
@@ -19,14 +22,16 @@ namespace Clickly.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateStory(StoryVM story)
             {
-            int loggedInUser = 1;
+            var loggedInUser = GetUserId();
+            if (loggedInUser == null) return RedirectToLogin();
+
             var imageUploadPath = await _filesService.UploadImageAsync(story.Image, ImageFileType.StoryImage);
             var newStory = new Story()
             {
                 DateCreated = DateTime.UtcNow,
                 IsDeleted = false,
                 Image = imageUploadPath,
-                UserId = loggedInUser
+                UserId = loggedInUser.Value
             };
            
             await _storiesService.CreateStoryAsync(newStory);

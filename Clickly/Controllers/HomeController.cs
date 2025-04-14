@@ -1,12 +1,15 @@
+using Clickly.Controllers.Base;
 using Clickly.Data.Helper.Enums;
 using Clickly.Data.Models;
 using Clickly.ServiceContracts;
 using Clickly.ViewModels.Home;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clickly.Controllers
 {
-    public class HomeController : Controller
+    [Authorize]
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IHashtagsService _hashtagsService;
@@ -23,9 +26,11 @@ namespace Clickly.Controllers
 
         public async Task<IActionResult> Index()
         {
-            int loggedInUser = 1;
+            var loggedInUser = GetUserId();
+            if (loggedInUser == null) return RedirectToLogin();
+
             // we are left joining users with posts 
-            var allPosts = await _postService.GetAllPostsAsync(loggedInUser);
+            var allPosts = await _postService.GetAllPostsAsync(loggedInUser.Value);
 
             return View(allPosts);
         }
@@ -33,7 +38,9 @@ namespace Clickly.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePost(PostVM post)
         {
-            int loggedIn = 1; // we will change it to authentication later
+            var loggedInUser = GetUserId();
+            if (loggedInUser == null) return RedirectToLogin();
+
             var imageUploadPath = await _filesService.UploadImageAsync(post.Image, ImageFileType.PostImage);
             var newPost = new Post() { 
             Content = post.Content,
@@ -41,7 +48,7 @@ namespace Clickly.Controllers
             DateUpdated = DateTime.UtcNow,
             Image = imageUploadPath,
             NumberOfReport = 0,
-            UserId = loggedIn
+            UserId = loggedInUser.Value
             };
 
             await _postService.CreatePostAsync(newPost);
@@ -56,21 +63,23 @@ namespace Clickly.Controllers
         [HttpPost]
         public  async Task<IActionResult> TogglePostLike(PostLikeVM postLike)
         {
-            int loggedInUser = 1;
+            var loggedInUser = GetUserId();
+            if (loggedInUser == null) return RedirectToLogin();
             // checking if the user already liked the post or not.  
-            await _postService.TogglePostLikeAsync(postLike.PostId, loggedInUser);
+            await _postService.TogglePostLikeAsync(postLike.PostId, loggedInUser.Value);
             return RedirectToAction("Index");
         }
         [HttpPost]
         public async Task<IActionResult> AddPostComment(PostCommentVM postComment)
         {
-            int loggedInUser = 1;
-            
+            var loggedInUser = GetUserId();
+            if (loggedInUser == null) return RedirectToLogin();
+
             var newComment = new Comment() 
             {
                 PostId = postComment.PostId,
                 Content = postComment.Content,
-                UserId = loggedInUser,
+                UserId = loggedInUser.Value,
                 DateCreated = DateTime.UtcNow,
                 DateUpdated = DateTime.UtcNow
             };
@@ -89,17 +98,19 @@ namespace Clickly.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavorite)
         {
-            int loggedInUser = 1;
-            await _postService.TogglePostFavoriteAsync(postFavorite.PostId, loggedInUser);
+            var loggedInUser = GetUserId();
+            if (loggedInUser == null) return RedirectToLogin();
+            await _postService.TogglePostFavoriteAsync(postFavorite.PostId, loggedInUser.Value);
             return RedirectToAction("Index");
         }
 
         [HttpPost]
         public async Task<IActionResult> TogglePostVisibility(PostVisibilityVM postVisibility)
         {
-            int loggedInUser = 1;
-            
-            await _postService.ToggleVisibilityPostAsync(postVisibility.PostId, loggedInUser);
+            var loggedInUser = GetUserId();
+            if (loggedInUser == null) return RedirectToLogin();
+
+            await _postService.ToggleVisibilityPostAsync(postVisibility.PostId, loggedInUser.Value);
             
             return RedirectToAction("Index");
         }
@@ -107,8 +118,9 @@ namespace Clickly.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPostReport(PostReportVM postReport)
         {
-            int loggedInUser = 1;
-            await _postService.ReportPostAsync(postReport.PostID, loggedInUser);
+            var loggedInUser = GetUserId();
+            if (loggedInUser == null) return RedirectToLogin();
+            await _postService.ReportPostAsync(postReport.PostID, loggedInUser.Value);
             return RedirectToAction("Index");
         }
             
@@ -126,6 +138,7 @@ namespace Clickly.Controllers
             var post = await _postService.GetPostByIdAsync(postId);
             return View(post);
         }
+
 
     }
 }

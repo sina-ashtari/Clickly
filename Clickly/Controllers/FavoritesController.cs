@@ -1,9 +1,13 @@
-﻿using Clickly.ServiceContracts;
+﻿using System.Security.Claims;
+using Clickly.Controllers.Base;
+using Clickly.ServiceContracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clickly.Controllers
 {
-    public class FavoritesController : Controller
+    [Authorize]
+    public class FavoritesController : BaseController
     {
         private readonly IPostService _postService;
         public FavoritesController(IPostService postService)
@@ -12,8 +16,10 @@ namespace Clickly.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            int loggedInUserId = 1;
-            var myFavoritePost = await _postService.GetAllFavoritedPostAsync(loggedInUserId);
+            
+            var loggedInUser = GetUserId();
+            if (loggedInUser == null) return RedirectToLogin();
+            var myFavoritePost = await _postService.GetAllFavoritedPostAsync(loggedInUser.Value);
             return View(myFavoritePost);
         }
     }
