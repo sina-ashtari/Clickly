@@ -1,4 +1,5 @@
-﻿@model Post
+﻿@using System.Security.Claims
+@model Post
 
 @{
     TimeSpan timeSpanSincePosted = DateTime.UtcNow.Subtract(Model.DateCreated);
@@ -10,11 +11,12 @@
         var t when t.TotalMinutes >= 1 => $"{(int)t.TotalMinutes}m ago",
         _ => "Just now"
     };
-
-    bool isFavorited = Model.Favorites.Any(n => n.UserId == 1);
-    bool isLiked = Model.Like.Any(n => n.UserId == 1);
-    bool isPrivate = Model.IsPrivate == true && Model.UserId == 1;
-    bool isReported = Model.Reports.Any(n => n.UserId == 1);
+    
+    int loggedInUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int result) ? result : 0;
+    bool isFavorited = Model.Favorites.Any(n => n.UserId == loggedInUserId);
+    bool isLiked = Model.Like.Any(n => n.UserId == loggedInUserId);
+    bool isPrivate = Model.IsPrivate == true && Model.UserId == loggedInUserId;
+    bool isReported = Model.Reports.Any(n => n.UserId == loggedInUserId);
     bool showAllComments = ViewData["ShowAllComments"] as bool? ??  false;
 }
 
@@ -36,7 +38,7 @@
             <button type="button" class="button-icon w-8 h-8"> <ion-icon class="text-xl" name="ellipsis-horizontal"></ion-icon> </button>
             <div class="w-[245px] post-options-dropdown" uk-dropdown="pos: bottom-right; animation: uk-animation-scale-up uk-transform-origin-top-right; animate-out: true; mode: click">
 
-                @if(Model.UserId == 1)
+                @if (Model.UserId == loggedInUserId)
                 {
 
                     <form asp-controller="Home" asp-action="TogglePostVisibility">
@@ -188,7 +190,6 @@
         </div>
         <form asp-controller="Home" asp-action="AddPostComment">
         <div class="sm:px-4 sm:py-3 p-2.5 border-t border-gray-100 flex items-center gap-1">
-            <img src="~/images/avatar/user.png" class="w-6 h-6 rounded-full" />
             
                 <input type="hidden" name="postId" value="@Model.Id"/>
                 <div class="flex-1 relative overflow-hidden h-10">
