@@ -47,11 +47,18 @@ namespace Clickly
                 options.AccessDeniedPath = "/Authentication/AccessDenied";
             });
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddGoogle(options =>
             {
-                options.LoginPath = "/Authentication/Login";
-                options.AccessDeniedPath = "/Authentication/AccessDenied";
+                options.ClientId = builder.Configuration["Auth:Google:ClientID"] ?? "";
+                options.ClientSecret = builder.Configuration["Auth:Google:ClientSecret"] ?? "";
+                options.CallbackPath = "/signin-google";
+            }).AddGitHub(options =>
+            {
+                options.ClientId = builder.Configuration["Auth:Github:ClientID"] ?? "";
+                options.ClientSecret = builder.Configuration["Auth:Github:ClientSecret"] ?? "";
+                options.CallbackPath = "/signin-github";
             });
+
             builder.Services.AddAuthorization();
 
             builder.Services.AddControllersWithViews();
