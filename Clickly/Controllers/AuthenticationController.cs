@@ -3,6 +3,7 @@ using Clickly.Data.Helper.Constants;
 using Clickly.Data.Models;
 using Clickly.ViewModels.Authentication;
 using Clickly.ViewModels.Settings;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,15 +17,15 @@ namespace Clickly.Controllers
         public AuthenticationController(UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _signInManager = signInManager;
-            _userManager = userManager; 
+            _userManager = userManager;
         }
         public async Task<IActionResult> Login()
         {
             return View();
         }
 
-        public async Task<IActionResult> Register() 
-        { 
+        public async Task<IActionResult> Register()
+        {
             return View();
         }
 
@@ -32,15 +33,15 @@ namespace Clickly.Controllers
         public async Task<IActionResult> Login(LoginVM loginVM)
         {
             if (!ModelState.IsValid) return View(loginVM);
-            var existingUser = await _userManager.FindByEmailAsync(loginVM.Email); 
-            if(existingUser == null)
+            var existingUser = await _userManager.FindByEmailAsync(loginVM.Email);
+            if (existingUser == null)
             {
                 ModelState.AddModelError("", "Invalid Email or Password");
                 return View(loginVM);
             }
 
             var existingUserClaims = await _userManager.GetClaimsAsync(existingUser);
-            if(!existingUserClaims.Any(c => c.Type == CustomClaim.FullName))
+            if (!existingUserClaims.Any(c => c.Type == CustomClaim.FullName))
             {
                 await _userManager.AddClaimAsync(existingUser, new Claim(CustomClaim.FullName, existingUser.FullName));
             }
@@ -48,8 +49,8 @@ namespace Clickly.Controllers
 
             if (result.Succeeded)
             {
-               
-               
+
+
                 return RedirectToAction("Index", "Home");
             }
 
@@ -104,7 +105,7 @@ namespace Clickly.Controllers
         public async Task<IActionResult> UpdatePassword(UpdatePasswordVM updatePasswordVM)
         {
 
-            if (updatePasswordVM.NewPassword != updatePasswordVM.ConfirmPassword) 
+            if (updatePasswordVM.NewPassword != updatePasswordVM.ConfirmPassword)
             {
                 TempData["PasswordError"] = "Passwords don't match";
                 TempData["ActiveTab"] = "Password";
@@ -139,7 +140,7 @@ namespace Clickly.Controllers
             user.UserName = profileVM.UserName;
             user.Bio = profileVM.Bio;
             var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded) 
+            if (!result.Succeeded)
             {
                 TempData["UserProfileUpdateError"] = "User profile could not updated";
                 TempData["ActiveTab"] = "Profile";
@@ -147,6 +148,46 @@ namespace Clickly.Controllers
             }
             await _signInManager.RefreshSignInAsync(user);
             return RedirectToAction("Index", "Settings");
+        }
+
+        public IActionResult ExternalLogin(string provider)
+        {
+            var redirectUrl = Url.Action("ExternalLoginCallback", "Authentication");
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+        public async Task<IActionResult> ExternalLoginCallback()
+        {
+            var info = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+            if (info == null) return RedirectToAction("Login");
+
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            if(user == null)
+            {
+                var newUser = new User()
+                {
+                    FullName = info.Principal.FindFirstValue(ClaimTypes.Name),
+                    Email = email,
+                    UserName = email,
+                    EmailConfirmed = true
+                };
+
+                var result = await _userManager.CreateAsync(newUser);
+                
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(newUser, AppRoles.User);
+                    await _userManager.AddClaimAsync(newUser, new Claim(CustomClaim.FullName, newUser.FullName));
+                    await _signInManager.SignInAsync(newUser, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            return RedirectToAction("Index", "Home");
+
+
         }
     }
 }
