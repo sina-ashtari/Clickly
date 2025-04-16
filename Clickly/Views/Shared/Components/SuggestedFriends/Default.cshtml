@@ -1,0 +1,31 @@
+﻿@model List<UserWithFriendsVM>
+
+<div class="flex items-baseline justify-between text-black">
+    <h3 class="font-bold text-base"> People you may know </h3>
+</div>
+
+<div class="side-list">
+    @foreach(var user in Model)
+    {
+
+        <div class="side-list-item">
+            <a asp-controller="Users" asp-action="Details" asp-route-userId="1003">
+
+                <img src="@(!string.IsNullOrEmpty(user.ProfilePictureUrl) ? Url.Content(user.ProfilePictureUrl) : Url.Content("~/images/avatar/user.png" ))" class="side-list-image rounded-full" />
+            </a>
+            <div class="flex-1">
+                <a>
+                    <h4 class="side-list-title">
+                        @user.FullName
+                    </h4>
+                </a>
+                <div class="side-list-info">@user.FriendCountDisplay</div>
+            </div>
+            <form asp-action="SendFriendRequest" asp-controller="Friends" method="post">
+                <input type="hidden" name="receiverId" value="@user.UserId" />
+                <button type="submit" class="button bg-primary-soft text-primary">Follow</button>
+            </form>
+        </div>
+    }
+    
+</div>
