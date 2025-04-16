@@ -84,7 +84,10 @@ namespace Clickly.Services
 
         public async Task TogglePostFavoriteAsync(int postId, int userId)
         {
-            var favorite = await _dbContext.Favorites.Where(like => like.PostId == postId && like.UserId == userId).FirstOrDefaultAsync();
+            var favorite = await _dbContext.Favorites
+                .Where(l => l.PostId == postId && l.UserId == userId)
+                .FirstOrDefaultAsync();
+
             if (favorite != null)
             {
                 _dbContext.Favorites.Remove(favorite);
@@ -92,13 +95,13 @@ namespace Clickly.Services
             }
             else
             {
-                var newfavorite = new Favorite()
+                var newFavorite = new Favorite()
                 {
                     PostId = postId,
                     UserId = userId,
-                    DateCreated= DateTime.UtcNow
+                    DateCreated = DateTime.UtcNow
                 };
-                await _dbContext.Favorites.AddAsync(newfavorite);
+                await _dbContext.Favorites.AddAsync(newFavorite);
                 await _dbContext.SaveChangesAsync();
             }
         }
