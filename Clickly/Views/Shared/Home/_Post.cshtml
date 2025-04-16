@@ -11,24 +11,26 @@
         var t when t.TotalMinutes >= 1 => $"{(int)t.TotalMinutes}m ago",
         _ => "Just now"
     };
-    
+
     int loggedInUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int result) ? result : 0;
     bool isFavorited = Model.Favorites.Any(n => n.UserId == loggedInUserId);
     bool isLiked = Model.Like.Any(n => n.UserId == loggedInUserId);
     bool isPrivate = Model.IsPrivate == true && Model.UserId == loggedInUserId;
     bool isReported = Model.Reports.Any(n => n.UserId == loggedInUserId);
+
     bool showAllComments = ViewData["ShowAllComments"] as bool? ??  false;
+    bool showDetails = ViewData["ShowDetails"] as bool? ?? true;
 }
 
 <div class="bg-white rounded-xl shadow-sm text-sm font-medium border1">
 
     @* Post heading *@
     <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
-        <a>
+        <a asp-controller="Users" asp-action="Details" asp-route-userId="@Model.UserId">
             <img src="@(Model.User.ProfilePictureUrl ?? "~/images/avatar/user.png")" class="w-9 h-9 rounded-full" />
         </a>
         <div class="flex-1">
-            <a>
+            <a asp-controller="Users" asp-action="Details" asp-route-userId="@Model.UserId">
                 <h4 class="text-black">@Model.User.FullName</h4>
                 <div class="text-xs text-gray-500/80" title="@Model.DateCreated.ToString("MM/dd/yyyy HH:mm")"> @displayTime </div>
             </a>
@@ -51,15 +53,15 @@
 
 
                     <button type="submit" onclick="openPostDeleteDialog('@Model.Id')" class="text-red-400 hover:!bg-red-50 icon-link delete-post-btn">
-                            <ion-icon name="trash-bin-outline"></ion-icon> Delete Post
-                        </button>
-                    
+                        <ion-icon name="trash-bin-outline"></ion-icon> Delete Post
+                    </button>
+
 
                 }else {
-                    
+
                     // move next if to here 
                 }
-                
+
                 @if (!isReported)
                 {
                     <form asp-controller="Home" asp-action="AddPostReport">
@@ -101,10 +103,10 @@
                 <input type="hidden" name="postId" value="@Model.Id" />
                 <button type="submit" class="button-icon @(isLiked ? "text-red-500 bg-red-100" : "")">
                     <ion-icon class="text-lg" 
-                              name="@(isLiked ? "heart" : "heart-outline")"></ion-icon>
+                    name="@(isLiked ? "heart" : "heart-outline")"></ion-icon>
                 </button>
             </form>
-            
+
             <a href="#">@Model.Like.Count</a>
         </div>
 
@@ -132,73 +134,80 @@
             {
                 <a href="#">@Model.Favorites.Count</a>
             }
-            
+
         </div>
     </div>
 
     @* Add comment section *@
-    <div>
-        <div class="p-2.5 border-t border-gray-100 font-normal space-y-3 relative">
+    @if (showDetails)
+    {
+        <div>
+            <div class="p-2.5 border-t border-gray-100 font-normal space-y-3 relative">
 
 
 
-            @foreach (var comment in showAllComments ? Model.Comments.OrderByDescending(n => n.DateCreated) : Model.Comments.OrderByDescending(n => n.DateCreated).Take(2))
-            {
-                TimeSpan commentTimeSpanSincePosted = DateTime.UtcNow.Subtract(comment.DateCreated);
-
-                string commentDisplayTime = commentTimeSpanSincePosted switch
+                @foreach (var comment in showAllComments ? Model.Comments.OrderByDescending(n => n.DateCreated) : Model.Comments.OrderByDescending(n => n.DateCreated).Take(2))
                 {
-                    var t when t.TotalDays >= 1 => $"{(int)t.TotalDays}d ago",
-                    var t when t.TotalHours >= 1 => $"{(int)t.TotalHours}h ago",
-                    var t when t.TotalMinutes >= 1 => $"{(int)t.TotalMinutes}m ago",
-                    _ => "Just now"
-                };
+                    TimeSpan commentTimeSpanSincePosted = DateTime.UtcNow.Subtract(comment.DateCreated);
 
-                <div class="flex items-start gap-3 relative">
-                    <a>
-                        <img src="@(Model.User.ProfilePictureUrl ?? "~/images/avatar/user.png")" class="w-6 h-6 mt-1 rounded-full" />
-                    </a>
+                    string commentDisplayTime = commentTimeSpanSincePosted switch
+                    {
+                        var t when t.TotalDays >= 1 => $"{(int)t.TotalDays}d ago",
+                        var t when t.TotalHours >= 1 => $"{(int)t.TotalHours}h ago",
+                        var t when t.TotalMinutes >= 1 => $"{(int)t.TotalMinutes}m ago",
+                        _ => "Just now"
+                    };
 
-                <div class="flex-1">
-                    <div class="flex justify-content-between">
-                         <a class="text-black font-medium  inline-block flex-grow">@comment.User.FullName</a>
-                            <small>@commentDisplayTime</small>
+                    <div class="flex items-start gap-3 relative">
+                        <a asp-controller="Users" asp-action="Details" asp-route-userId="@comment.UserId">
+                            <img src="@(comment.User.ProfilePictureUrl ?? Url.Content("~/images/avatar/user.png"))" class="w-6 h-6 mt-1 rounded-full" />
+                        </a>
+
+                        <div class="flex-1">
+                            <div class="flex justify-content-between">
+                                <a asp-controller="Users" asp-action="Details" asp-route-userId="@comment.UserId" class="text-black font-medium  inline-block flex-grow">@comment.User.FullName</a>
+                                <small>@commentDisplayTime</small>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="mt-0.5">@comment.Content</p>
+                                <form asp-controller="Home" asp-action="RemovePostComment">
+                                    <input type="hidden" name="commentId" value="@comment.Id" />
+                                    <button type="submit" class="text-red-500 text-xs ml-2 " title="Remove post comment">
+                                        <ion-icon name="trash-outline "></ion-icon>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
                     </div>
-                    <div class="flex items-center justify-between">
-                            <p class="mt-0.5">@comment.Content</p>
-                            <form asp-controller="Home" asp-action="RemovePostComment">
-                                <input type="hidden" name="commentId" value="@comment.Id"/>
-                                <button type="submit" class="text-red-500 text-xs ml-2 " title="Remove post comment">
-                                    <ion-icon name="trash-outline "></ion-icon>
-                                </button>
-                            </form>
+                }
+
+                @if (Model.Comments.Count >= 3 && !showAllComments)
+                {
+                    <div class="p-1.5">
+                        <a asp-controller="Home" asp-action="Details" asp-route-postId="@Model.Id">
+                            Show all comments
+                        </a>
                     </div>
-                    
-                </div>
-                </div>
-            }
+                }
 
-            @if(Model.Comments.Count >= 3 && !showAllComments)
-            {
-                <div class ="p-1.5"> 
-                    <a asp-controller="Home" asp-action="Details" asp-route-postId="@Model.Id">
-                        Show all comments
-                    </a>
-                </div >
-            }
+            </div>
+            <form asp-controller="Home" asp-action="AddPostComment">
+                <div class="sm:px-4 sm:py-3 p-2.5 border-t border-gray-100 flex items-center gap-1">
+                    @* <a asp-controller="Users" asp-action="Details" asp-route-userId="@Model.UserId"> *@
+                    @*     <img src="@(string. IsNullOrEmpty(Model.User.ProfilePictureUrl) ? Url.Content("~/images/avatar/user.png") : Url.Content(Model. User. ProfilePictureUrl))" class="w-6 h-6 rounded- *@
+                    @*         full" /> *@
+                    @* </a> *@
+                    <input type="hidden" name="postId" value="@Model.Id" />
+                    <div class="flex-1 relative overflow-hidden h-10">
+                        <textarea name="content" placeholder="Add Comment...." rows="1" class="w-full resize-none !bg-transparent px-4 py-2 focus:!border-transparent focus:!ring-transparent"></textarea>
+                    </div>
+                    <button type="submit" class="text-sm rounded-full py-1.5 px-3.5 bg-secondery">Comment</button>
 
-        </div>
-        <form asp-controller="Home" asp-action="AddPostComment">
-        <div class="sm:px-4 sm:py-3 p-2.5 border-t border-gray-100 flex items-center gap-1">
-            
-                <input type="hidden" name="postId" value="@Model.Id"/>
-                <div class="flex-1 relative overflow-hidden h-10">
-                    <textarea name="content" placeholder="Add Comment...." rows="1" class="w-full resize-none !bg-transparent px-4 py-2 focus:!border-transparent focus:!ring-transparent"></textarea>
                 </div>
-                <button type="submit" class="text-sm rounded-full py-1.5 px-3.5 bg-secondery">Comment</button>
-           
+            </form>
         </div>
-        </form>
-    </div>
+    }
+    
 </div>
 
