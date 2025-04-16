@@ -21,6 +21,8 @@ namespace Clickly.Data
         public DbSet<Report> Reports { get; set; }
         public DbSet<Story> Stories { get; set; }
         public DbSet<Hashtags> Hashtags { get; set; }
+        public DbSet<FriendRequest> FriendRequests { get; set; }
+        public DbSet<Friendship> Friendships { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -63,19 +65,19 @@ namespace Clickly.Data
             .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Favorite>()
-                .HasKey(f => new { f.PostId, f.UserId });  
+                .HasKey(f => new { f.PostId, f.UserId });
 
             modelBuilder.Entity<Favorite>()
-            .HasOne(f => f.Post)
-            .WithMany(p => p.Favorites)
-            .HasForeignKey(f => f.UserId)
-            .OnDelete(DeleteBehavior.NoAction);
+                .HasOne(f => f.Post)
+                .WithMany(p => p.Favorites)
+                .HasForeignKey(f => f.PostId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Favorite>()
-            .HasOne(f => f.User)
-            .WithMany(u => u.Favorites)
-            .HasForeignKey(f => f.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(f => f.User)
+                .WithMany(u => u.Favorites)
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Report>()
                 .HasKey(f => new { f.PostId, f.UserId });
@@ -92,6 +94,29 @@ namespace Clickly.Data
             .HasForeignKey(f => f.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<FriendRequest>()
+                .HasOne(friend => friend.Sender)
+                .WithMany()
+                .HasForeignKey(friend => friend.SenderId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<FriendRequest>()
+                .HasOne(friend => friend.Receiver)
+                .WithMany()
+                .HasForeignKey(friend => friend.ReceiverId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Friendship>()
+                .HasOne(friend => friend.Sender)
+                .WithMany()
+                .HasForeignKey(friend => friend.SenderId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Friendship>()
+                .HasOne(friend => friend.Receiver)
+                .WithMany()
+                .HasForeignKey(friend => friend.ReceiverId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
 
