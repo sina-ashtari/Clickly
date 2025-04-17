@@ -38,19 +38,17 @@ namespace Clickly.Controllers
             return RedirectToAction("Index", "Home");
 
         }
-
         [HttpPost]
-        public async Task<IActionResult> CancelFriendRequest(int requestId)
+        public async Task<IActionResult> RemoveFriend(int friendshipId)
         {
-            await _friendsService.UpdateRequestStatusAsync(requestId, FriendshipStatus.Canceled);
+            await _friendsService.RemoveFriendAsync(friendshipId);
             return RedirectToAction("Index");
 
         }
-
         [HttpPost]
-        public async Task<IActionResult> AcceptFriendRequest(int requestId)
+        public async Task<IActionResult> UpdateFriendRequest(int requestId, string status)
         {
-            await _friendsService.UpdateRequestStatusAsync(requestId, FriendshipStatus.Accepted);
+            await _friendsService.UpdateRequestStatusAsync(requestId, status);
             return RedirectToAction("Index");
 
         }
