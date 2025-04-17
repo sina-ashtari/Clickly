@@ -13,5 +13,6 @@ namespace Clickly.ServiceContracts
         Task<List<FriendRequest>> GetSentFriendRequestAsync(int userId);
         Task<List<FriendRequest>> GetReceivedFriendRequestAsync(int userId);
         Task<List<Friendship>> GetFriendsAsync(int userId);
+        Task RemoveFriendAsync(int friendshipId);
     }
 }

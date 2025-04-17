@@ -76,6 +76,27 @@ namespace Clickly.Services
             return suggestedFriends;
         }
 
+        public async Task RemoveFriendAsync(int frienshipId)
+        {
+            var friendship = await _dbContext.Friendships.FirstOrDefaultAsync(n => n.Id == frienshipId);
+            if (friendship != null)
+            {
+                _dbContext.Friendships.Remove(friendship);
+                await _dbContext.SaveChangesAsync();
+
+                //find requests
+                var requests = await _dbContext.FriendRequests
+                    .Where(r => (r.SenderId == friendship.SenderId && r.ReceiverId == friendship.ReceiverId) ||
+                    (r.SenderId == friendship.ReceiverId && r.ReceiverId == friendship.SenderId))
+                    .ToListAsync();
+
+                if (requests.Any())
+                {
+                    _dbContext.FriendRequests.RemoveRange(requests);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+        }
 
         public async Task<bool> SendRequestAsync(int senderId, int receiverId)
         {
