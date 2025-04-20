@@ -1,27 +1,33 @@
 using Clickly.Controllers.Base;
+using Clickly.Data.Helper.Constants;
 using Clickly.Data.Helper.Enums;
 using Clickly.Data.Models;
+using Clickly.Hubs;
 using Clickly.ServiceContracts;
 using Clickly.ViewModels.Home;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Clickly.Controllers
 {
     [Authorize]
     public class HomeController : BaseController
     {
-        private readonly ILogger<HomeController> _logger;
+        
         private readonly IHashtagsService _hashtagsService;
         private readonly IPostService _postService;
         private readonly IFilesService _filesService;
+        
+        private readonly INotificationsService _notificationsService;
 
-        public HomeController(ILogger<HomeController> logger, IHashtagsService hashtagsService, IPostService postService, IFilesService filesService)
+        public HomeController(IHashtagsService hashtagsService, IPostService postService, IFilesService filesService,  INotificationsService notificationsService)
         {
             _hashtagsService = hashtagsService;
-            _logger = logger;
+           
             _postService = postService;
             _filesService = filesService;   
+            _notificationsService = notificationsService;
         }
 
         public async Task<IActionResult> Index()
@@ -61,18 +67,26 @@ namespace Clickly.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public  async Task<IActionResult> TogglePostLike(PostLikeVM postLike)
         {
             var loggedInUser = GetUserId();
+            var userName = GetFullName();
             if (loggedInUser == null) return RedirectToLogin();
             // checking if the user already liked the post or not.  
-            await _postService.TogglePostLikeAsync(postLike.PostId, loggedInUser.Value);
-            return RedirectToAction("Index");
+            var result = await _postService.TogglePostLikeAsync(postLike.PostId, loggedInUser.Value);
+            
+
+            var post = await _postService.GetPostByIdAsync(postLike.PostId);
+            if (result.SendNotification) await _notificationsService.AddNotificationAsync(userId: post.UserId, notificationType: NotificationType.Like, postId: postLike.PostId, userFullName: userName);
+            return PartialView("Home/_Post", post);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddPostComment(PostCommentVM postComment)
         {
             var loggedInUser = GetUserId();
+            var userName = GetFullName();
             if (loggedInUser == null) return RedirectToLogin();
 
             var newComment = new Comment() 
@@ -84,14 +98,20 @@ namespace Clickly.Controllers
                 DateUpdated = DateTime.UtcNow
             };
             await _postService.AddPostCommentAsync(newComment);
-            return RedirectToAction("Index");   
+            var post = await _postService.GetPostByIdAsync(postComment.PostId);
+            await _notificationsService.AddNotificationAsync(post.UserId, NotificationType.Comment, postComment.PostId, userName);
+            return PartialView("Home/_post", post);
+            
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemovePostComment(RemoveCommentVM comment)
         {
             await _postService.DeletePostCommentAsync(comment.CommentId);
-            return RedirectToAction("Index");
+            var post = await _postService.GetPostByIdAsync(comment.PostId);
+            return PartialView("Home/_Post", post);
+            
         }
 
 
@@ -99,9 +119,13 @@ namespace Clickly.Controllers
         public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavorite)
         {
             var loggedInUser = GetUserId();
+            var userName = GetFullName();
             if (loggedInUser == null) return RedirectToLogin();
-            await _postService.TogglePostFavoriteAsync(postFavorite.PostId, loggedInUser.Value);
-            return RedirectToAction("Index");
+            var result = await _postService.TogglePostFavoriteAsync(postFavorite.PostId, loggedInUser.Value);
+
+            var post = await _postService.GetPostByIdAsync(postFavorite.PostId);
+            if (result.SendNotification) await _notificationsService.AddNotificationAsync(post.UserId, NotificationType.Favorite, postFavorite.PostId, userName);
+            return PartialView("Home/_Post", post);
         }
 
         [HttpPost]
