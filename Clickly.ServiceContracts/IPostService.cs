@@ -1,5 +1,5 @@
-﻿using Clickly.Data.Models;
-using Microsoft.AspNetCore.Http;
+﻿using Clickly.Data.Dtos;
+using Clickly.Data.Models;
 
 namespace Clickly.ServiceContracts
 {
@@ -14,8 +14,8 @@ namespace Clickly.ServiceContracts
         Task AddPostCommentAsync(Comment comment);
         Task DeletePostCommentAsync(int commentId);
 
-        Task TogglePostLikeAsync(int postId, int userId);
-        Task TogglePostFavoriteAsync(int postId, int userId);
+        Task<GetNotificationDto> TogglePostLikeAsync(int postId, int userId);
+        Task<GetNotificationDto> TogglePostFavoriteAsync(int postId, int userId);
         Task ToggleVisibilityPostAsync(int postId, int userId);
         Task ReportPostAsync(int postId, int userId);
     }
