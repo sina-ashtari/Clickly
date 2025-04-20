@@ -1,8 +1,9 @@
 using Clickly.Data;
 using Clickly.Data.Helper;
 using Clickly.Data.Models;
+using Clickly.Hubs;
 using Clickly.ServiceContracts;
-using Clickly.Services;
+using Clickly.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,7 @@ namespace Clickly
             builder.Services.AddScoped<IFilesService, FilesService>();
             builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<IFriendsService, FriendsService>();
+            builder.Services.AddScoped<INotificationsService, NotificationsService>();
 
             // Identity configuration
             builder.Services.AddIdentity<User, IdentityRole<int>>( options =>
@@ -61,7 +63,7 @@ namespace Clickly
             });
 
             builder.Services.AddAuthorization();
-
+            builder.Services.AddSignalR();
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
@@ -85,16 +87,16 @@ namespace Clickly
 
             app.UseHttpsRedirection();
             app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization(); 
-            app.UseAuthorization();
+            
 
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
-
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapHub<NotificationHub>("/notificationHub");
             app.Run();
         }
     }
