@@ -10,8 +10,10 @@ namespace Clickly.Controllers
     public class FriendsController : BaseController
     {
         private readonly IFriendsService _friendsService;
-        public FriendsController(IFriendsService friendsService)
+        private readonly INotificationsService _notificationsService;
+        public FriendsController(IFriendsService friendsService, INotificationsService notificationsService)
         {
+            _notificationsService = notificationsService;
             _friendsService = friendsService;
         }
         public async Task<IActionResult> Index()
@@ -33,8 +35,10 @@ namespace Clickly.Controllers
         { 
             var userId = GetUserId();
             if (!userId.HasValue) RedirectToLogin();
+            var userName = GetFullName();
 
             await _friendsService.SendRequestAsync(userId.Value, receiverId);
+            await _notificationsService.AddNotificationAsync(userId: receiverId, userFullName: userName, notificationType: NotificationType.FriendRequest, postId: null);
             return RedirectToAction("Index", "Home");
 
         }
@@ -42,13 +46,19 @@ namespace Clickly.Controllers
         public async Task<IActionResult> RemoveFriend(int friendshipId)
         {
             await _friendsService.RemoveFriendAsync(friendshipId);
+            
             return RedirectToAction("Index");
 
         }
         [HttpPost]
         public async Task<IActionResult> UpdateFriendRequest(int requestId, string status)
         {
-            await _friendsService.UpdateRequestStatusAsync(requestId, status);
+            var userId = GetUserId();
+            if (!userId.HasValue) RedirectToLogin();
+            var userName = GetFullName();
+
+            var request = await _friendsService.UpdateRequestStatusAsync(requestId, status);
+            if(status == FriendshipStatus.Accepted) await _notificationsService.AddNotificationAsync(userId: request.SenderId, userFullName: userName, notificationType: NotificationType.FriendRequestApproved, postId: null);
             return RedirectToAction("Index");
 
         }
