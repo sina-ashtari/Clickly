@@ -12,6 +12,14 @@ namespace Clickly.Controllers.Base
                 return null;
             return int.Parse(loggedInUser);
         }
+        protected string? GetFullName()
+        {
+            var loggedInUserFullName = User.FindFirstValue(ClaimTypes.Name);
+            //var GivenName = User.FindFirstValue(ClaimTypes.GivenName);
+            //var Surname = User.FindFirstValue(ClaimTypes.Surname);
+
+            return loggedInUserFullName;
+        }
         protected IActionResult RedirectToLogin()
         {
             return RedirectToAction("Login", "Authentication");
