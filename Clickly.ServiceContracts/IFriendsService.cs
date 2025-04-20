@@ -7,7 +7,7 @@ namespace Clickly.ServiceContracts
     public interface IFriendsService
     {
         Task<bool> SendRequestAsync(int senderId, int receiverId);
-        Task UpdateRequestStatusAsync(int requestId, string status);
+        Task<FriendRequest> UpdateRequestStatusAsync(int requestId, string status);
         
         Task<List<UserWithFriendsDto>> GetSuggestedFriendsAsync(int userId);
         Task<List<FriendRequest>> GetSentFriendRequestAsync(int userId);
