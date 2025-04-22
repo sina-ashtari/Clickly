@@ -31,6 +31,7 @@ namespace Clickly
             builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<IFriendsService, FriendsService>();
             builder.Services.AddScoped<INotificationsService, NotificationsService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
 
             // Identity configuration
             builder.Services.AddIdentity<User, IdentityRole<int>>( options =>
