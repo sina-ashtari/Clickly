@@ -59,17 +59,15 @@
 
                 }else {
 
-                    // move next if to here 
-                }
-
-                @if (!isReported)
-                {
-                    <form asp-controller="Home" asp-action="AddPostReport">
-                        <input type="hidden" name="postId" value="@Model.Id" />
-                        <button type="submit" class="hover:!bg-red-50 icon-link">
-                            <ion-icon class="text-xl shrink-0" name="flag-outline"></ion-icon>  Report
-                        </button>
-                    </form>
+                    @if (!isReported)
+                    {
+                        <form asp-controller="Home" asp-action="AddPostReport">
+                            <input type="hidden" name="postId" value="@Model.Id" />
+                            <button type="submit" class="hover:!bg-red-50 icon-link">
+                                <ion-icon class="text-xl shrink-0" name="flag-outline"></ion-icon>  Report
+                            </button>
+                        </form>
+                    }
                 }
 
             </div>
