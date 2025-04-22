@@ -82,6 +82,13 @@ namespace Clickly.Services.Services
             };
 
             await _dbContext.Reports.AddAsync(newReport);
+            
+            var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            if(post != null)
+            {
+                post.NumberOfReport += 1;
+                _dbContext.Posts.Update(post);   
+            }
             await _dbContext.SaveChangesAsync();
         }
 
