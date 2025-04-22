@@ -67,7 +67,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('posts-container').addEventListener('click', function () {
-            const button = event.target.closest('.like-button, .favorite.button')
+            const button = event.target.closest('.like-button, .favorite-button')
             if(button){
                 event.preventDefault();
                 
