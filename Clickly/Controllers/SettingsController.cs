@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Clickly.Controllers.Base;
+using Clickly.Data.Helper.Constants;
 using Clickly.Data.Helper.Enums;
 using Clickly.Data.Models;
 using Clickly.ServiceContracts;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Clickly.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = $"{AppRoles.User},{AppRoles.Admin}")]
     public class SettingsController : BaseController
     {
         private readonly IUsersService _usersService;

@@ -18,7 +18,6 @@ namespace Clickly.Controllers
         private readonly IHashtagsService _hashtagsService;
         private readonly IPostService _postService;
         private readonly IFilesService _filesService;
-        
         private readonly INotificationsService _notificationsService;
 
         public HomeController(IHashtagsService hashtagsService, IPostService postService, IFilesService filesService,  INotificationsService notificationsService)
@@ -56,7 +55,7 @@ namespace Clickly.Controllers
             NumberOfReport = 0,
             UserId = loggedInUser.Value
             };
-
+            if(newPost.Content == null) return RedirectToAction("Index");
             await _postService.CreatePostAsync(newPost);
 
             // find and store hashtags 
@@ -78,7 +77,7 @@ namespace Clickly.Controllers
             
 
             var post = await _postService.GetPostByIdAsync(postLike.PostId);
-            if (result.SendNotification) await _notificationsService.AddNotificationAsync(userId: post.UserId, notificationType: NotificationType.Like, postId: postLike.PostId, userFullName: userName);
+            if (result.SendNotification && loggedInUser != post.UserId) await _notificationsService.AddNotificationAsync(userId: post.UserId, notificationType: NotificationType.Like, postId: postLike.PostId, userFullName: userName);
             return PartialView("Home/_Post", post);
         }
         [HttpPost]
@@ -99,7 +98,8 @@ namespace Clickly.Controllers
             };
             await _postService.AddPostCommentAsync(newComment);
             var post = await _postService.GetPostByIdAsync(postComment.PostId);
-            await _notificationsService.AddNotificationAsync(post.UserId, NotificationType.Comment, postComment.PostId, userName);
+            if (loggedInUser != post.UserId)
+            await _notificationsService.AddNotificationAsync(userId: post.UserId,notificationType: NotificationType.Comment,postId: postComment.PostId, userFullName : userName);
             return PartialView("Home/_post", post);
             
         }
@@ -124,7 +124,7 @@ namespace Clickly.Controllers
             var result = await _postService.TogglePostFavoriteAsync(postFavorite.PostId, loggedInUser.Value);
 
             var post = await _postService.GetPostByIdAsync(postFavorite.PostId);
-            if (result.SendNotification) await _notificationsService.AddNotificationAsync(post.UserId, NotificationType.Favorite, postFavorite.PostId, userName);
+            if (result.SendNotification && loggedInUser != post.UserId) await _notificationsService.AddNotificationAsync(userId : post.UserId,notificationType: NotificationType.Favorite, postId : postFavorite.PostId,userFullName: userName);
             return PartialView("Home/_Post", post);
         }
 

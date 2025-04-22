@@ -1,10 +1,13 @@
 ﻿using Clickly.Controllers.Base;
+using Clickly.Data.Helper.Constants;
 using Clickly.Data.Models;
 using Clickly.ServiceContracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clickly.Controllers
 {
+    [Authorize(Roles = AppRoles.User)]
     public class NotificationsController : BaseController
     {
         private readonly INotificationsService _notificationsService;

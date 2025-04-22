@@ -2,11 +2,12 @@
 using Clickly.Data.Helper.Constants;
 using Clickly.ServiceContracts;
 using Clickly.ViewModels.Friends;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clickly.Controllers
 {
-
+    [Authorize(Roles = AppRoles.User)]
     public class FriendsController : BaseController
     {
         private readonly IFriendsService _friendsService;

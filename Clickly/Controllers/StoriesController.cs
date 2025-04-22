@@ -1,4 +1,5 @@
 ﻿using Clickly.Controllers.Base;
+using Clickly.Data.Helper.Constants;
 using Clickly.Data.Helper.Enums;
 using Clickly.Data.Models;
 using Clickly.ServiceContracts;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Clickly.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = AppRoles.User)]
     public class StoriesController : BaseController
     {
         private readonly IStoriesService _storiesService;

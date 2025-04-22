@@ -1,11 +1,14 @@
-﻿using Clickly.Data.Models;
+﻿using Clickly.Data.Helper.Constants;
+using Clickly.Data.Models;
 using Clickly.ServiceContracts;
 using Clickly.ViewModels.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clickly.Controllers
 {
+    [Authorize(Roles = AppRoles.User)]
     public class UsersController : Controller
     {
 
