@@ -86,7 +86,7 @@ namespace Clickly.Data
             modelBuilder.Entity<Report>()
             .HasOne(f => f.Post)
             .WithMany(p => p.Reports)
-            .HasForeignKey(f => f.UserId)
+            .HasForeignKey(f => f.PostId)
             .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Report>()
