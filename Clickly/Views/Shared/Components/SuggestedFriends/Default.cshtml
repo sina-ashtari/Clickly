@@ -9,7 +9,7 @@
     {
 
         <div class="side-list-item">
-            <a asp-controller="Users" asp-action="Details" asp-route-userId="1003">
+            <a asp-controller="Users" asp-action="Details" asp-route-userId="@user.UserId">
 
                 <img src="@(!string.IsNullOrEmpty(user.ProfilePictureUrl) ? Url.Content(user.ProfilePictureUrl) : Url.Content("~/images/avatar/user.png" ))" class="side-list-image rounded-full" />
             </a>
