@@ -65,7 +65,7 @@ namespace Clickly.Services.Services
             if (postDatabase != null)
             {
                 postDatabase.IsDeleted = true;
-                _dbContext.Posts.Remove(postDatabase);
+                _dbContext.Posts.Update(postDatabase);
                 await _dbContext.SaveChangesAsync();
             }
             return postDatabase;
@@ -82,14 +82,16 @@ namespace Clickly.Services.Services
             };
 
             await _dbContext.Reports.AddAsync(newReport);
-            
+            await _dbContext.SaveChangesAsync();
+
             var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == postId);
             if(post != null)
             {
                 post.NumberOfReport += 1;
-                _dbContext.Posts.Update(post);   
+                _dbContext.Posts.Update(post);
+                await _dbContext.SaveChangesAsync();
             }
-            await _dbContext.SaveChangesAsync();
+            
         }
 
         public async Task<GetNotificationDto> TogglePostFavoriteAsync(int postId, int userId)
