@@ -22,7 +22,7 @@
     bool showDetails = ViewData["ShowDetails"] as bool? ?? true;
 }
 
-<div id="post-@Model.Id" class="bg-white rounded-xl shadow-sm text-sm font-medium border1">
+<div id="post-@Model.Id" class="box backdrop-blur-xl rounded-xl shadow-sm text-sm font-medium border1">
 
     @* Post heading *@
     <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
@@ -144,43 +144,52 @@
             <div class="p-2.5 border-t border-gray-100 font-normal space-y-3 relative">
 
 
-
-                @foreach (var comment in showAllComments ? Model.Comments.OrderByDescending(n => n.DateCreated) : Model.Comments.OrderByDescending(n => n.DateCreated).Take(2))
+                @if(Model.Comments.Count == 0)
                 {
-                    TimeSpan commentTimeSpanSincePosted = DateTime.UtcNow.Subtract(comment.DateCreated);
-
-                    string commentDisplayTime = commentTimeSpanSincePosted switch
+                    <p class="font-normal">
+                        Be the first one to comment!
+                    </p>
+                }
+                else
+                {
+                    @foreach (var comment in showAllComments ? Model.Comments.OrderByDescending(n => n.DateCreated) : Model.Comments.OrderByDescending(n => n.DateCreated).Take(2))
                     {
-                        var t when t.TotalDays >= 1 => $"{(int)t.TotalDays}d ago",
-                        var t when t.TotalHours >= 1 => $"{(int)t.TotalHours}h ago",
-                        var t when t.TotalMinutes >= 1 => $"{(int)t.TotalMinutes}m ago",
-                        _ => "Just now"
-                    };
 
-                    <div class="flex items-start gap-3 relative">
-                        <a asp-controller="Users" asp-action="Details" asp-route-userId="@comment.UserId">
-                            <img src="@(comment.User.ProfilePictureUrl ?? Url.Content("~/images/avatar/user.png"))" class="w-6 h-6 mt-1 rounded-full" />
-                        </a>
+                        TimeSpan commentTimeSpanSincePosted = DateTime.UtcNow.Subtract(comment.DateCreated);
 
-                        <div class="flex-1">
-                            <div class="flex justify-content-between">
-                                <a asp-controller="Users" asp-action="Details" asp-route-userId="@comment.UserId" class="text-black font-medium  inline-block flex-grow">@comment.User.FullName</a>
-                                <small>@commentDisplayTime</small>
+                        string commentDisplayTime = commentTimeSpanSincePosted switch
+                        {
+                            var t when t.TotalDays >= 1 => $"{(int)t.TotalDays}d ago",
+                            var t when t.TotalHours >= 1 => $"{(int)t.TotalHours}h ago",
+                            var t when t.TotalMinutes >= 1 => $"{(int)t.TotalMinutes}m ago",
+                            _ => "Just now"
+                        };
+
+                        <div class="flex items-start gap-3 relative">
+                            <a asp-controller="Users" asp-action="Details" asp-route-userId="@comment.UserId">
+                                <img src="@(comment.User.ProfilePictureUrl ?? Url.Content("~/images/avatar/user.png"))" class="w-6 h-6 mt-1 rounded-full" />
+                            </a>
+
+                            <div class="flex-1">
+                                <div class="flex justify-content-between">
+                                    <a asp-controller="Users" asp-action="Details" asp-route-userId="@comment.UserId" class="text-black font-medium  inline-block flex-grow">@comment.User.FullName</a>
+                                    <small>@commentDisplayTime</small>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <p class="mt-0.5">@comment.Content</p>
+                                    <form asp-controller="Home" asp-action="RemovePostComment" class="remove-comment-form">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="commentId" value="@comment.Id" />
+                                        <input type="hidden" name="postId" value="@comment.PostId" />
+                                        <button type="submit" class="text-red-500 text-xs ml-2 " title="Remove post comment">
+                                            <ion-icon name="trash-outline "></ion-icon>
+                                        </button>
+                                    </form>
+                                </div>
+
                             </div>
-                            <div class="flex items-center justify-between">
-                                <p class="mt-0.5">@comment.Content</p>
-                                <form asp-controller="Home" asp-action="RemovePostComment" class="remove-comment-form">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="commentId" value="@comment.Id" />
-                                    <input type="hidden" name="postId" value="@comment.PostId" />
-                                    <button type="submit" class="text-red-500 text-xs ml-2 " title="Remove post comment">
-                                        <ion-icon name="trash-outline "></ion-icon>
-                                    </button>
-                                </form>
-                            </div>
-
                         </div>
-                    </div>
+                    }
                 }
 
                 @if (Model.Comments.Count >= 3 && !showAllComments)
