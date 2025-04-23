@@ -1,5 +1,5 @@
-﻿<div id="postDeleteDialog" uk-modal">
-	<div class="uk-modal-dialog relative mx-auto bg-white rounded-lg shadow-xl w-[400px]">
+﻿<div id="postDeleteDialog" uk-modal>
+	<div class="box uk-modal-dialog relative mx-auto rounded-lg shadow-xl w-[400px]">
 		@*Header*@
 		<div class="p-6">
 			<h2 class="text-xl font-semibold">
@@ -17,7 +17,7 @@
 			<form asp-controller="Home" asp-action="PostDelete">
 				<input type="hidden" name ="postId" id="deleteConfirmationPostId" value=""/>
 				<button type="button" class="px-4 py-1.5 rounded-md uk-modal-close">Cancel</button>
-				<button type="submit" class="px-5 py-1.5 bg-gray-100 rounded-md">Delete</button>
+				<button type="submit" class="px-5 py-1.5 bg-red-600 rounded-md">Delete</button>
 			</form>
 			
 		</div>
