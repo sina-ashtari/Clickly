@@ -13,6 +13,7 @@ A modern, extensible social media web application built on C# and ASP.NET MVC, f
 - **Friend Requests Management**: Send, cancel, ignore, and approve friend requests.
 - **Trending Section**: Discover the most popular hashtags in real time.
 - **Real-Time Updates**: Powered by SignalR for live notifications and chat.
+- **Admins/Modders dashboard**: Checking reported users post and reject or approve them.
 
 ---
 
@@ -89,6 +90,14 @@ Each layer is organized in its own project namespace:
    dotnet run
    ```
    Navigate to `https://localhost:5001` in your browser.
+
+
+## Design 
+
+![authentication](https://github.com/user-attachments/assets/ba4a60e6-b84c-49dc-b041-3b5d275b1765)
+![feed or home page](https://github.com/user-attachments/assets/0ba59d9b-ba39-4399-a6bb-6e0c8364a6da)
+![friends screen](https://github.com/user-attachments/assets/03da168b-83a7-4f34-8bb4-337bf34a8710)
+
 
 ## 🤝 Contributing
 
