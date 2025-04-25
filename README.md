@@ -1,6 +1,6 @@
 **Clickly**
 
-[![.NET](https://img.shields.io/badge/.NET-9.0-blue)](https://dotnet.microsoft.com/) [![EntityFramework](https://img.shields.io/badge/EF%20Core-9.0-lightgrey)](https://docs.microsoft.com/ef/core/) [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.0-teal)](https://tailwindcss.com/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-9.0-blue)](https://dotnet.microsoft.com/) [![EntityFramework](https://img.shields.io/badge/EF%20Core-9.0-lightgrey)](https://docs.microsoft.com/ef/core/) [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.0-teal)](https://tailwindcss.com/)
 
 A modern, extensible social media web application built on C# and ASP.NET MVC, following an N-Tier architecture and leveraging Entity Framework Core for data access. The frontend is styled with Tailwind CSS and enhanced with JavaScript.
 
