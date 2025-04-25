@@ -12,6 +12,7 @@ A modern, extensible social media web application built on C# and ASP.NET MVC, f
 - **Likes, Shares & Favorites**: Engage with content by liking, sharing, or favoriting posts.
 - **Friend Requests Management**: Send, cancel, ignore, and approve friend requests.
 - **Trending Section**: Discover the most popular hashtags in real time.
+- **Real-Time Updates**: Powered by SignalR for live notifications and chat.
 
 ---
 
@@ -22,9 +23,10 @@ A modern, extensible social media web application built on C# and ASP.NET MVC, f
 | Presentation     | ASP.NET MVC, Razor Views, Tailwind CSS  |
 | Business Logic   | C#, .NET 9.0, Dependency Injection     |
 | Data Access      | Entity Framework Core, SQL Server/MySQL |
-| Client Scripting | JavaScript (ES6+)                       |
+| Client Scripting | JavaScript (ES6+) |
+| Real-time Communication | SignalR |
 
----
+
 
 ## 📐 Architecture
 
