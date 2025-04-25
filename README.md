@@ -92,7 +92,7 @@ Each layer is organized in its own project namespace:
    Navigate to `https://localhost:5001` in your browser.
 
 
-## Design 
+## 🖋️ Design 
 
 ![authentication](https://github.com/user-attachments/assets/ba4a60e6-b84c-49dc-b041-3b5d275b1765)
 ![feed or home page](https://github.com/user-attachments/assets/0ba59d9b-ba39-4399-a6bb-6e0c8364a6da)
