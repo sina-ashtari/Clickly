@@ -10,7 +10,7 @@
 				<p class="text-sm text-gray-600 font-normal">If you have not signed up yet, <a asp-controller="Authentication" asp-action="Register" class="text-blue-700">Register here!</a></p>
 			</div>
 			<form asp-controller="Authentication" asp-action="Login" method="post" class="space-y-7 text-sm text-black font-medium">
-				<div class="col-span-2 text-red-500" sp-validation-summary="ModelOnly"></div>
+				<div class="col-span-2 text-red-500" asp-validation-summary="ModelOnly"></div>
 				<div>
 					<label asp-for="Email">Email address</label>
 					<div class="mt-2.5">
