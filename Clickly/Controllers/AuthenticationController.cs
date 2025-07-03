@@ -64,6 +64,13 @@ namespace Clickly.Controllers
         {
             if (!ModelState.IsValid) return View(registerVM);
 
+            var existingUser = await _userManager.FindByEmailAsync(registerVM.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email already exists");
+                return View(registerVM);
+            }
+
             var newUser = new User()
             {
                 FullName = $"{registerVM.FirstName} {registerVM.LastName}",
@@ -71,12 +78,6 @@ namespace Clickly.Controllers
                 UserName = registerVM.Email
             };
 
-            var existingUser = await _userManager.FindByEmailAsync(registerVM.Email);
-            if (existingUser != null)
-            {
-                ModelState.AddModelError("Email", "Email already exists");
-                return View(registerVM);
-            }
 
             var result = await _userManager.CreateAsync(newUser, registerVM.Password);
 
