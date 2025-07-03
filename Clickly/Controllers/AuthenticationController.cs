@@ -45,7 +45,7 @@ namespace Clickly.Controllers
             {
                 await _userManager.AddClaimAsync(existingUser, new Claim(CustomClaim.FullName, existingUser.FullName));
             }
-            var result = await _signInManager.PasswordSignInAsync(existingUser.UserName, loginVM.Password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(existingUser.UserName, loginVM.Password, loginVM.RememberMe, false);
 
             if (result.Succeeded)
             {

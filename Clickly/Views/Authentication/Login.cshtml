@@ -7,7 +7,7 @@
 
 			<div>
 				<h2 class="text-2xl font-semibold mb-1.5">Sign in to your account</h2>
-				<p class="text-sm text-gray-700 font-normal">If you have not signed up yet, <a asp-controller="Authentication" asp-action="Register" class="text-blue-700">Register here!</a></p>
+				<p class="text-sm text-gray-600 font-normal">If you have not signed up yet, <a asp-controller="Authentication" asp-action="Register" class="text-blue-700">Register here!</a></p>
 			</div>
 			<form asp-controller="Authentication" asp-action="Login" method="post" class="space-y-7 text-sm text-black font-medium">
 				<div class="col-span-2 text-red-500" sp-validation-summary="ModelOnly"></div>
@@ -26,9 +26,9 @@
 					</div>
 				</div>
 				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-2.5">
-						<input id="rememberme" name="rememberme" type="checkbox" />
-						<label for="rememberme" class="font-normal">Remember me</label>
+					<div class="form-check flex items-center justify-between">
+						<input asp-for="RememberMe" class="form-check-input" />
+						<label asp-for="RememberMe" class="form-check-label">Remember Me</label>
 					</div>
 					<a href="#" class="text-blue-700">Forget password</a>
 				</div>
