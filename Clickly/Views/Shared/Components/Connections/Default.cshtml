@@ -1,0 +1,25 @@
+﻿@model List<UserWithFriendsVM>
+
+@if (Model == null || !Model.Any())
+{
+    <h3>
+        This person has zero connection, be the first one!
+    </h3>
+}
+else
+{
+    <div class="grid grid-cols-3 gap-2 gap-y-5 text-center text-sm mt-4 mb-2">
+        @foreach (var user in Model)
+        {
+            <div>
+                <div class="relative w-full aspect-square rounded-lg overflow-hidden">
+                    <a asp-controller="Users" asp-action="Details" asp-route-userId="@user.UserId">
+                        <img src="@(!string.IsNullOrEmpty(user.ProfilePictureUrl) ? Url.Content(user.ProfilePictureUrl) : Url.Content("~/images/avatar/user.png"))" class="object-cover w-full h-full inset-0" />
+                    </a>
+                </div>
+                <div class="mt-2 line-clamp-1">@user.FullName</div>
+                <div class="side-list-info">@user.FriendCountDisplay</div>
+            </div>
+        }
+    </div>
+}
