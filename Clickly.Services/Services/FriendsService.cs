@@ -4,6 +4,7 @@ using Clickly.Data.Helper.Constants;
 using Clickly.Data.Models;
 using Clickly.ServiceContracts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Clickly.Services.Services
 {
@@ -63,7 +64,12 @@ namespace Clickly.Services.Services
 
             // getting suggested friend
             var suggestedFriends = await _dbContext.Users
-                .Where(n => n.Id != userId && !existingFriendsIds.Contains(n.Id) && !pendingRequestIds.Contains(n.Id))
+                .Where(n =>
+                n.Id != userId &&
+                !existingFriendsIds.Contains(n.Id) &&
+                !pendingRequestIds.Contains(n.Id) 
+                //!admins.Contains(n.Id)
+                )
                 .Select(user => new UserWithFriendsDto()
                 {
                     User = user,
@@ -137,6 +143,30 @@ namespace Clickly.Services.Services
                 await _dbContext.SaveChangesAsync();
             }
             return requestDb;
+        }
+
+        public async Task<List<UserWithFriendsDto>> GetConnectionsAsync(int userId)
+        {
+            var connections = await _dbContext.FriendRequests
+                .Where(f => (f.SenderId == userId || f.ReceiverId == userId) && f.Status == FriendshipStatus.Accepted)
+                .Select(f => new
+                {
+                    ConnectionUser = f.SenderId == userId ? f.Receiver : f.Sender,
+                    ConnectionUserId = f.SenderId == userId ? f.ReceiverId : f.SenderId,
+                }).ToListAsync();
+            var result = new List<UserWithFriendsDto>();
+            foreach (var conn in connections) 
+            {
+                int count = await _dbContext.FriendRequests.CountAsync(x => (x.SenderId == conn.ConnectionUserId || x.ReceiverId == conn.ConnectionUserId) && x.Status == FriendshipStatus.Accepted);
+
+                result.Add(new UserWithFriendsDto
+                {
+                    User = conn.ConnectionUser,
+                    FriendsCount = count
+                });
+
+            }
+            return result;
         }
     }
 }
