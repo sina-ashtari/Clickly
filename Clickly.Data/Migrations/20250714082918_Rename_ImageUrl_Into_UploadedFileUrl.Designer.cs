@@ -4,6 +4,7 @@ using Clickly.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Clickly.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250714082918_Rename_ImageUrl_Into_UploadedFileUrl")]
+    partial class Rename_ImageUrl_Into_UploadedFileUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.Favorite", b =>
@@ -78,7 +81,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Favorites", (string)null);
+                    b.ToTable("Favorites");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.FriendRequest", b =>
@@ -111,7 +114,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("FriendRequests", (string)null);
+                    b.ToTable("FriendRequests");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.Friendship", b =>
@@ -137,7 +140,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Friendships", (string)null);
+                    b.ToTable("Friendships");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.Hashtags", b =>
@@ -163,7 +166,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Hashtags", (string)null);
+                    b.ToTable("Hashtags");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.Like", b =>
@@ -186,7 +189,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Likes", (string)null);
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.Message", b =>
@@ -222,7 +225,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.Notification", b =>
@@ -258,7 +261,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.Post", b =>
@@ -298,7 +301,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Posts", (string)null);
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.Report", b =>
@@ -319,7 +322,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reports", (string)null);
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.Story", b =>
@@ -346,7 +349,7 @@ namespace Clickly.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Stories", (string)null);
+                    b.ToTable("Stories");
                 });
 
             modelBuilder.Entity("Clickly.Data.Models.User", b =>
