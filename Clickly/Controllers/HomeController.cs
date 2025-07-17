@@ -2,12 +2,10 @@ using Clickly.Controllers.Base;
 using Clickly.Data.Helper.Constants;
 using Clickly.Data.Helper.Enums;
 using Clickly.Data.Models;
-using Clickly.Hubs;
 using Clickly.ServiceContracts;
 using Clickly.ViewModels.Home;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Clickly.Controllers
 {
