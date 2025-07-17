@@ -1,4 +1,5 @@
-﻿using Clickly.Data.Helper.Constants;
+﻿using Clickly.Controllers.Base;
+using Clickly.Data.Helper.Constants;
 using Clickly.Data.Models;
 using Clickly.ServiceContracts;
 using Clickly.ViewModels.Users;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clickly.Controllers
 {
     [Authorize(Roles = AppRoles.User)]
-    public class UsersController : Controller
+    public class UsersController : BaseController
     {
 
         private readonly IUsersService _usersService;
@@ -27,11 +28,15 @@ namespace Clickly.Controllers
 
         public async Task<IActionResult> Details(int userId) 
         {
+            var currentUserId = GetUserId();
+            if (currentUserId == null) RedirectToLogin();
+
             var user = await _userManager.FindByIdAsync(userId.ToString());
             var userPost = await _usersService.GetUserPosts(userId);
 
             var userProfileVM = new GetUserProfileVM()
             {
+                CurrentUserId = currentUserId.Value,
                 Posts = userPost,
                 User = user
             };
