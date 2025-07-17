@@ -1,0 +1,560 @@
+﻿@model PrivateChatVM
+
+@{
+    ViewData["Title"] = $"Chat with {Model.TargetFullName}";
+    var currentUserId = Model.CurrentUserId.ToString();
+    var targetUserId = Model.TargetUserId.ToString();
+}
+
+
+<main id="site__main" class="2xl:ml-[--w-side] xl:ml-[--w-side-sm] p-2.5 h-[calc(100vh-var(--m-top))] mt-[--m-top]">
+    <div class="lg:flex 2xl:gap-16 gap-12 max-w-[1065px] mx-auto" id="js-oversized">
+        <div class="max-w-[680px] mx-auto flex flex-col space-y-4 h-full">
+
+            <div class="flex items-center gap-4 box rounded-xl shadow-sm p-4 border1">
+                <img src="@(!string.IsNullOrEmpty(Model.TargetProfilePicture) ? Url.Content(Model.TargetProfilePicture) : Url.Content("~/images/avatar/user.png"))" alt="Profile" class="w-10 h-10 rounded-full" />
+                <h2 class="text-lg font-semibold">@Model.TargetFullName</h2>
+            </div>
+
+            <div id="messagesList" class="box flex-1 overflow-y-auto p-4 rounded-xl border1 shadow-sm h-[400px] space-y-4">
+                @if (Model.Messages != null)
+                {
+                    @foreach (var msg in Model.Messages)
+                    {
+                        <div class="flex items-start gap-3 @(msg.SenderId == Model.CurrentUserId ? "flex-row-reverse" : "")">
+                            <!-- Profile Picture -->
+                            <img src="@(msg.SenderId == Model.CurrentUserId ?
+                                       (!string.IsNullOrEmpty(Model.CurrentProfilePicture) ? Url.Content(Model.CurrentProfilePicture) : Url.Content("~/images/avatar/user.png")) :
+                                        (!string.IsNullOrEmpty(Model.TargetProfilePicture) ? Url.Content(Model.TargetProfilePicture) : Url.Content("~/images/avatar/user.png")))"
+                         alt="Profile"
+                         class="w-8 h-8 rounded-full flex-shrink-0 mt-1" />
+
+                            <!-- Message Container -->
+                            <div class="flex flex-col max-w-[70%] @(msg.SenderId == Model.CurrentUserId ? "items-end" : "items-start")">
+                                <!-- Username -->
+                                <div class="text-xs text-gray-500 mb-1 @(msg.SenderId == Model.CurrentUserId ? "text-right" : "text-left")">
+                                    @(msg.SenderId == Model.CurrentUserId ? Model.CurrentFullName : Model.TargetFullName)
+                                </div>
+
+                                <!-- Message Content -->
+                                <div class="p-3 rounded-lg @(msg.SenderId == Model.CurrentUserId ? "bg-blue-500 text-white rounded-tr-sm" : "bg-gray-100 text-gray-900 rounded-tl-sm")">
+                            @if (!string.IsNullOrEmpty(msg.Text))
+                                    {
+                                        <div class="mb-2">@msg.Text</div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(msg.UploadedFileUrl))
+                                    {
+
+                                        var fileName = msg.UploadedFileUrl.Split('/').LastOrDefault() ?? "file";
+                                        var extension = fileName.Split('.').LastOrDefault()?.ToLower() ?? "";
+
+
+                                        @if (new[] { "jpg", "jpeg", "png", "gif", "webp", "svg", "bmp" }.Contains(extension))
+                                        {
+                                            <div class="media-container">
+                                                <img src="@msg.UploadedFileUrl"
+                                                     class="mt-2 max-w-full rounded cursor-pointer hover:opacity-90 transition-opacity"
+                                                     onclick="openImageModal('@msg.UploadedFileUrl')"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                                     loading="lazy" />
+                                                <div class="hidden text-red-500 text-sm mt-2">Failed to load image</div>
+                                            </div>
+                                        }
+                                        else if (new[] { "mp4", "webm", "ogg", "avi", "mov", "wmv", "flv" }.Contains(extension))
+                                        {
+                                            <div class="media-container">
+                                                <video controls class="mt-2 max-w-full rounded" preload="metadata">
+                                                    <source src="@msg.UploadedFileUrl" type="video/@extension">
+                                                    <div class="text-red-500 text-sm">Your browser doesn't support video playback</div>
+                                                </video>
+                                                <div class="text-xs text-gray-500 mt-1">Video • @fileName</div>
+                                            </div>
+                                        }
+                                        else if (new[] { "mp3", "wav", "aac", "flac", "ogg", "m4a" }.Contains(extension))
+                                        {
+                                            <div class="media-container">
+                                                <div class="flex items-center gap-3 mt-2 p-3 bg-gray-50 rounded-lg">
+                                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <div class="text-sm font-medium">@fileName</div>
+                                                        <audio controls class="w-full mt-1">
+                                                            <source src="@msg.UploadedFileUrl" type="audio/@extension">
+                                                            Your browser doesn't support audio playback
+                                                        </audio>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (extension == "pdf")
+                                        {
+                                            <div class="media-container">
+                                                <div class="flex items-center gap-3 mt-2 p-3 bg-red-50 rounded-lg border border-red-200">
+                                                    <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <div class="text-sm font-medium text-red-700">PDF Document</div>
+                                                        <div class="text-xs text-red-600">@fileName</div>
+                                                    </div>
+                                                    <a href="@msg.UploadedFileUrl" target="_blank" class="text-red-600 hover:text-red-800 text-sm underline">
+                                                        View
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (new[] { "doc", "docx", "txt", "rtf", "odt" }.Contains(extension))
+                                        {
+                                            <div class="media-container">
+                                                <div class="flex items-center gap-3 mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <div class="text-sm font-medium text-blue-700">Document</div>
+                                                        <div class="text-xs text-blue-600">@fileName</div>
+                                                    </div>
+                                                    <a href="@msg.UploadedFileUrl" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm underline">
+                                                        Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (new[] { "zip", "rar", "7z", "tar", "gz" }.Contains(extension))
+                                        {
+                                            <div class="media-container">
+                                                <div class="flex items-center gap-3 mt-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                                    <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M14,12L10,12L10,8L14,8L14,12M14,16L10,16L10,14L14,14L14,16M20,6L18,4L16,6L14,4L12,6L10,4L8,6L6,4L4,6L4,18L6,20L8,18L10,20L12,18L14,20L16,18L18,20L20,18L20,6Z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <div class="text-sm font-medium text-yellow-700">Archive</div>
+                                                        <div class="text-xs text-yellow-600">@fileName</div>
+                                                    </div>
+                                                    <a href="@msg.UploadedFileUrl" target="_blank" class="text-yellow-600 hover:text-yellow-800 text-sm underline">
+                                                        Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="media-container">
+                                                <div class="flex items-center gap-3 mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                                    <div class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
+                                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <div class="text-sm font-medium text-gray-700">File</div>
+                                                        <div class="text-xs text-gray-600">@fileName</div>
+                                                    </div>
+                                                    <a href="@msg.UploadedFileUrl" target="_blank" class="text-gray-600 hover:text-gray-800 text-sm underline">
+                                                        Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+
+                                <!-- Timestamp -->
+                                <div class="text-xs text-gray-400 mt-1 @(msg.SenderId == Model.CurrentUserId ? "text-right" : "text-left")"
+                                     data-sent="@msg.SentAt.ToString("o")">
+                                    <!-- placeholder text; JS will replace it -->
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <div class="box border1 rounded-xl p-4 shadow-sm space-y-3">
+                <textarea id="messageInput" class="textarea w-full resize-none" placeholder="Type your message..." rows="3"></textarea>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip,.rar" />
+                        <label for="fileInput" class="cursor-pointer text-sm p-2 px-4 rounded-lg hover:bg-gray-200 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                            </svg>
+                            Attach File
+                        </label>
+                        <div id="filePreview" class="text-sm text-gray-600"></div>
+                    </div>
+
+                    <button onclick="sendMessage()" class="button bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        Send
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script>
+    const currentUserData = {
+        id: "@Model.CurrentUserId",
+        name: "@Model.CurrentFullName",
+            profilePicture: "@(string.IsNullOrEmpty(Model.CurrentProfilePicture) ? Url.Content("~/images/avatar/user.png") : Url.Content("~/" + Model.CurrentProfilePicture.TrimStart('~', '/')))"
+    };
+
+        const targetUserData = {
+            id: "@Model.TargetUserId",
+            name: "@Model.TargetFullName",
+            
+            profilePicture: "@(string.IsNullOrEmpty(Model.TargetProfilePicture) ? Url.Content("~/images/avatar/user.png") : Url.Content("~/" + Model.TargetProfilePicture.TrimStart('~', '/')))"
+        };
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+    <script>
+            document.querySelectorAll('[data-sent]').forEach(el => {
+            const utcTime = new Date(el.getAttribute('data-sent'));
+            const localTime = utcTime.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            el.textContent = localTime;
+        });
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        connection.on("ReceiveMessage", function (senderId, message, uploadedFileUrl) {
+            console.log("From:", senderId, "Message:", message, "File:", uploadedFileUrl);
+
+            const messageDiv = createMessageElement(senderId, message, uploadedFileUrl);
+            const container = document.getElementById("messagesList");
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        });
+
+        connection.start().catch(err => console.error(err.toString()));
+
+                function createMessageElement(senderId, message, uploadedFileUrl) {
+            const isCurrentUser = senderId === currentUserData.id;
+            const userData = isCurrentUser ? currentUserData : targetUserData;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex items-start gap-3 ${isCurrentUser ? 'flex-row-reverse' : ''}`;
+
+            let content = `
+                <!-- Profile Picture -->
+                <img src="${userData.profilePicture}"
+                     alt="Profile"
+                     class="w-8 h-8 rounded-full flex-shrink-0 mt-1" />
+
+                <!-- Message Container -->
+                <div class="flex flex-col max-w-[70%] ${isCurrentUser ? 'items-end' : 'items-start'}">
+                    <!-- Username -->
+                    <div class="text-xs text-gray-500 mb-1 ${isCurrentUser ? 'text-right' : 'text-left'}">
+                        ${escapeHtml(userData.name)}
+                    </div>
+
+                    <!-- Message Content -->
+                    <div class="p-3 rounded-lg ${isCurrentUser ? 'bg-blue-500 text-white rounded-tr-sm' : 'bg-gray-100 text-gray-900 rounded-tl-sm'}">
+            `;
+
+            if (message) {
+                content += `<div class="mb-2">${escapeHtml(message)}</div>`;
+            }
+
+            if (uploadedFileUrl) {
+                content += createMediaElement(uploadedFileUrl);
+            }
+
+            content += `
+                    </div>
+
+                    <!-- Timestamp -->
+                    <div class="text-xs text-gray-400 mt-1 ${isCurrentUser ? 'text-right' : 'text-left'}">
+                        ${new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'})}
+                    </div>
+                </div>
+            `;
+
+            messageDiv.innerHTML = content;
+            return messageDiv;
+        }
+
+        function createMediaElement(fileUrl) {
+            const fileName = fileUrl.split('/').pop();
+            const extension = fileName.split('.').pop().toLowerCase();
+            
+            // Image files
+            if (["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp"].includes(extension)) {
+                return `
+                    <div class="media-container">
+                        <img src="${fileUrl}"
+                             class="mt-2 max-w-full rounded cursor-pointer hover:opacity-90 transition-opacity"
+                             onclick="openImageModal('${fileUrl}')"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                             loading="lazy" />
+                        <div class="hidden text-red-500 text-sm mt-2">Failed to load image</div>
+                    </div>`;
+            }
+            
+            // Video files
+            else if (["mp4", "webm", "ogg", "avi", "mov", "wmv", "flv"].includes(extension)) {
+                return `
+                    <div class="media-container">
+                        <video controls class="mt-2 max-w-full rounded" preload="metadata">
+                            <source src="${fileUrl}" type="video/${extension}">
+                            <div class="text-red-500 text-sm">Your browser doesn't support video playback</div>
+                        </video>
+                        <div class="text-xs text-gray-500 mt-1">Video • ${fileName}</div>
+                    </div>`;
+            }
+            
+            // Audio files
+            else if (["mp3", "wav", "aac", "flac", "ogg", "m4a"].includes(extension)) {
+                return `
+                    <div class="media-container">
+                        <div class="flex items-center gap-3 mt-2 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium">${fileName}</div>
+                                <audio controls class="w-full mt-1">
+                                    <source src="${fileUrl}" type="audio/${extension}">
+                                    Your browser doesn't support audio playback
+                                </audio>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            
+            // PDF files
+            else if (extension === "pdf") {
+                return `
+                    <div class="media-container">
+                        <div class="flex items-center gap-3 mt-2 p-3 bg-red-50 rounded-lg border border-red-200">
+                            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-red-700">PDF Document</div>
+                                <div class="text-xs text-red-600">${fileName}</div>
+                            </div>
+                            <a href="${fileUrl}" target="_blank" class="text-red-600 hover:text-red-800 text-sm underline">
+                                View
+                            </a>
+                        </div>
+                    </div>`;
+            }
+            
+            // Document files
+            else if (["doc", "docx", "txt", "rtf", "odt"].includes(extension)) {
+                return `
+                    <div class="media-container">
+                        <div class="flex items-center gap-3 mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-blue-700">Document</div>
+                                <div class="text-xs text-blue-600">${fileName}</div>
+                            </div>
+                            <a href="${fileUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm underline">
+                                Download
+                            </a>
+                        </div>
+                    </div>`;
+            }
+            
+            // Archive files
+             else if (["zip", "rar", "7z", "tar", "gz"].includes(extension)) {
+                return `
+                    <div class="media-container">
+                        <div class="flex items-center gap-3 mt-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14,12L10,12L10,8L14,8L14,12M14,16L10,16L10,14L14,14L14,16M20,6L18,4L16,6L14,4L12,6L10,4L8,6L6,4L4,6L4,18L6,20L8,18L10,20L12,18L14,20L16,18L18,20L20,18L20,6Z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-yellow-700">Archive</div>
+                                <div class="text-xs text-yellow-600">${fileName}</div>
+                            </div>
+                            <a href="${fileUrl}" target="_blank" class="text-yellow-600 hover:text-yellow-800 text-sm underline">
+                                Download
+                            </a>
+                        </div>
+                    </div>`;
+            }
+            
+            // Default file type
+             else {
+                return `
+                    <div class="media-container">
+                        <div class="flex items-center gap-3 mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-gray-700">File</div>
+                                <div class="text-xs text-gray-600">${fileName}</div>
+                            </div>
+                            <a href="${fileUrl}" target="_blank" class="text-gray-600 hover:text-gray-800 text-sm underline">
+                                Download
+                            </a>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function openImageModal(imageUrl) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="relative max-w-4xl max-h-full p-4">
+                    <img src="${imageUrl}" class="max-w-full max-h-full rounded-lg" />
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            class="absolute top-2 right-2 bg-white rounded-full p-2 hover:bg-gray-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // File input change handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('filePreview');
+            
+            if (file) {
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                preview.textContent = `${file.name} (${fileSize} MB)`;
+                preview.className = 'text-sm text-blue-600';
+            } else {
+                preview.textContent = '';
+            }
+        });
+
+        // Enhanced send message function
+        async function sendMessage() {
+            const message = document.getElementById("messageInput").value.trim();
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+
+            if (!message && !file) return;
+
+            let fileUrl = null;
+            if (file) {
+                try {
+                    // Show loading state
+                    const sendButton = document.querySelector('button[onclick="sendMessage()"]');
+                    sendButton.disabled = true;
+                    sendButton.innerHTML = 'Uploading...';
+                    
+                    fileUrl = await uploadFile(file);
+                    
+                    // Reset button
+                    sendButton.disabled = false;
+                    sendButton.innerHTML = `
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        Send
+                    `;
+                } catch (err) {
+                    console.error("File upload failed:", err);
+                    alert("Failed to upload file: " + err.message);
+                    
+                    // Reset button on error
+                    const sendButton = document.querySelector('button[onclick="sendMessage()"]');
+                    sendButton.disabled = false;
+                    sendButton.innerHTML = `
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        Send
+                    `;
+                    return;
+                }
+            }
+
+            connection.invoke("SendMessage", "@targetUserId", message, fileUrl)
+                .catch(err => console.error(err.toString()));
+
+            // Clear inputs
+            document.getElementById("messageInput").value = "";
+            document.getElementById("fileInput").value = "";
+            document.getElementById("filePreview").textContent = "";
+        }
+
+        // Enhanced upload function
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch("/Chat/Private/Upload", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+            }
+
+            const result = await response.json();
+            return result.url;
+        }
+
+        // Allow Enter to send message (Shift+Enter for new line)
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-scroll to bottom on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById("messagesList");
+            container.scrollTop = container.scrollHeight;
+        });
+    </script>
+}
