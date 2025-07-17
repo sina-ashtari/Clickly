@@ -1,7 +1,5 @@
-﻿using Clickly.Data;
-using Clickly.ServiceContracts;
+﻿using Clickly.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Clickly.ViewComponents
 {
