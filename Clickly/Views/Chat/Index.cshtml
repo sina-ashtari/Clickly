@@ -1,0 +1,28 @@
+﻿@model List<ChatPreviewVM>
+
+<main id="site__main" class="2xl:ml-[--w-side]  xl:ml-[--w-side-sm] p-2.5 h-[calc(100vh-var(--m-top))] mt-[--m-top]">
+@foreach (var preview in Model)
+{
+    <div class="flex md:items-center space-x-4 p-4 rounded-md box">
+
+        <div class="w-14 h-14 flex-shrink-0 rounded-lg relative">
+            <img src="@(string.IsNullOrEmpty(preview.PartnerProfilePicture) ? Url.Content("~/images/avatar/user.png") :
+                                                              Url.Content(preview.PartnerProfilePicture))"
+             class="absolute w-full h-full inset-0 rounded-md object-cover shadow-sm" />
+    </div>
+
+        <div class="flex-1">
+            <a asp-controller="Users" asp-action="Details" asp-route-userId="@preview.PartnerId" class="text-base font-semibold capitalize text-black">@preview.PartnerName</a>
+            <h4>@preview.SentAt: @preview.LastMessage</h4>
+        </div>
+        
+
+        <form asp-controller="Chat" asp-action="Private" method="get" asp-route-id="@preview.PartnerId">
+            <button type="submit" class="button bg-primary-soft text-primary gap-1 max-md:hidden">
+                <ion-icon name="chatbox-ellipses-outline">Message</ion-icon>
+            </button>
+        </form>
+
+    </div>
+}
+</main>
